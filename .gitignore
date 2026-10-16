@@ -18,3 +18,15 @@
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+
+###> Docker & OS ###
+.DS_Store
+/docker-entrypoint-initdb.d/
+###< Docker & OS ###
+
+###> Uploads ###
+/public/uploads/*
+!/public/uploads/.gitkeep
+###< Uploads ###
+
+

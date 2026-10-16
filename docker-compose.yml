@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: inazaoui_db
+    restart: always
+    environment:
+      POSTGRES_DB: inazaoui_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  adminer:
+    image: adminer
+    container_name: inazaoui_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

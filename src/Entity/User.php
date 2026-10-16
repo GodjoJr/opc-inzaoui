@@ -6,10 +6,12 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,6 +29,9 @@ class User
 
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $password = null;
 
     #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user')]
     private Collection $medias;
@@ -48,9 +53,40 @@ class User
 
     public function setEmail(string $email): static
     {
-        $this->email = $email;
+        $this->email =$email;
 
         return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        $roles = ['ROLE_USER'];
+        if ($this->admin) {$roles[] = 'ROLE_ADMIN';
+        }
+
+        return array_unique($roles);
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password =$password;
+
+        return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Nettoyage de données sensibles temporaires si nécessaire
     }
 
     public function getName(): ?string
@@ -60,7 +96,7 @@ class User
 
     public function setName(?string $name): void
     {
-        $this->name = $name;
+        $this->name =$name;
     }
 
     public function getDescription(): ?string
@@ -70,7 +106,7 @@ class User
 
     public function setDescription(?string $description): void
     {
-        $this->description = $description;
+        $this->description =$description;
     }
 
     public function getMedias(): Collection
@@ -80,7 +116,7 @@ class User
 
     public function setMedias(Collection $medias): void
     {
-        $this->medias = $medias;
+        $this->medias =$medias;
     }
 
     public function isAdmin(): bool
@@ -90,6 +126,16 @@ class User
 
     public function setAdmin(bool $admin): void
     {
-        $this->admin = $admin;
+        $this->admin =$admin;
+    }
+
+    public function getUsername(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
     }
 }

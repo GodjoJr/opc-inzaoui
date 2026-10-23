@@ -19,6 +19,9 @@ class MediaType extends AbstractType
         $builder
             ->add('file', FileType::class, [
                 'label' => 'Image',
+                'attr' => [
+                    'accept' => 'image/jpeg,image/png,image/webp',
+                ],
             ])
             ->add('title', TextType::class, [
                 'label' => 'Titre',

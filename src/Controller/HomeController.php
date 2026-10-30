@@ -21,18 +21,31 @@ class HomeController extends AbstractController
     #[Route('/guests', name: 'guests')]
     public function guests(EntityManagerInterface $em): Response
     {
-        $guests = $em->getRepository(User::class)->findBy(['admin' => false]);
+        $guests = $em->getRepository(User::class)->findBy([
+            'admin' => false,
+            'isActive' => true,
+        ], ['name' => 'ASC']);
+
         return $this->render('front/guests.html.twig', [
-            'guests' => $guests
+            'guests' => $guests,
         ]);
     }
 
     #[Route('/guest/{id}', name: 'guest')]
     public function guest(int $id, EntityManagerInterface $em): Response
     {
-        $guest = $em->getRepository(User::class)->find($id);
+        $guest = $em->getRepository(User::class)->findOneBy([
+            'id' => $id,
+            'admin' => false,
+            'isActive' => true,
+        ]);
+
+        if (!$guest) {
+            throw $this->createNotFoundException('Cet invité n\'existe pas ou son accès a été suspendu.');
+        }
+
         return $this->render('front/guest.html.twig', [
-            'guest' => $guest
+            'guest' => $guest,
         ]);
     }
 
@@ -41,16 +54,28 @@ class HomeController extends AbstractController
     {
         $albums = $em->getRepository(Album::class)->findAll();
         $album = $id ? $em->getRepository(Album::class)->find($id) : null;
-        $user = $em->getRepository(User::class)->findOneByAdmin(true);
+        $admin = $em->getRepository(User::class)->findOneBy(['admin' => true]);
 
-        $medias = $album
-            ? $em->getRepository(Media::class)->findByAlbum($album)
-            : $em->getRepository(Media::class)->findByUser($user);
+        if ($album) {
+            $medias = $em->createQuery(
+                'SELECT m 
+                 FROM App\Entity\Media m 
+                 JOIN m.user u 
+                 WHERE m.album = :album 
+                   AND (u.admin = true OR u.isActive = true)'
+            )
+            ->setParameter('album', $album)
+            ->getResult();
+        } else {
+            $medias = $admin
+                ? $em->getRepository(Media::class)->findBy(['user' => $admin])
+                : [];
+        }
 
         return $this->render('front/portfolio.html.twig', [
             'albums' => $albums,
             'album'  => $album,
-            'medias' => $medias
+            'medias' => $medias,
         ]);
     }
 

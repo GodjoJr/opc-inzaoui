@@ -21,11 +21,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $admin = false;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $isActive = true;
+
     #[ORM\Column]
-    private ?string $name;
+    private ?string $name = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $description;
+    private ?string $description = null;
 
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
@@ -33,12 +36,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $password = null;
 
-    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user')]
+    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user', cascade: ['remove'], orphanRemoval: true)]
     private Collection $medias;
 
     public function __construct()
     {
         $this->medias = new ArrayCollection();
+        $this->isActive = true;
     }
 
     public function getId(): ?int
@@ -53,7 +57,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setEmail(string $email): static
     {
-        $this->email =$email;
+        $this->email = $email;
 
         return $this;
     }
@@ -66,7 +70,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = ['ROLE_USER'];
-        if ($this->admin) {$roles[] = 'ROLE_ADMIN';
+        if ($this->admin) {
+            $roles[] = 'ROLE_ADMIN';
         }
 
         return array_unique($roles);
@@ -79,14 +84,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setPassword(string $password): static
     {
-        $this->password =$password;
+        $this->password = $password;
 
         return $this;
     }
 
     public function eraseCredentials(): void
     {
-        // Nettoyage de données sensibles temporaires si nécessaire
     }
 
     public function getName(): ?string
@@ -96,7 +100,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setName(?string $name): void
     {
-        $this->name =$name;
+        $this->name = $name;
     }
 
     public function getDescription(): ?string
@@ -106,9 +110,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setDescription(?string $description): void
     {
-        $this->description =$description;
+        $this->description = $description;
     }
 
+    /**
+     * @return Collection<int, Media>
+     */
     public function getMedias(): Collection
     {
         return $this->medias;
@@ -116,7 +123,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setMedias(Collection $medias): void
     {
-        $this->medias =$medias;
+        $this->medias = $medias;
     }
 
     public function isAdmin(): bool
@@ -126,7 +133,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setAdmin(bool $admin): void
     {
-        $this->admin =$admin;
+        $this->admin = $admin;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
     }
 
     public function getUsername(): string

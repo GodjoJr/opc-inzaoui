@@ -1,56 +1,38 @@
 {% extends 'admin.html.twig' %}
 
-{% block title %}Ajouter un invité - Administration{% endblock %}
-
-{% block content %}
-<div class="container-fluid py-4">
+{% block admin %}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Ajouter un nouvel invité</h1>
-        <a href="{{ path('admin_guest_index') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
-        </a>
+        <h1>Ajouter un invité</h1>
+        <a href="{{ path('admin_guest_index') }}" class="btn btn-secondary">Retour</a>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    {{ form_start(form) }}
-                        {{ form_errors(form) }}
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
 
-                        <div class="mb-3">
-                            {{ form_label(form.name, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(form.name) }}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form_label(form.email, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(form.email) }}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form_label(form.plainPassword, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                            {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(form.plainPassword) }}
-                            <div class="form-text">Ce mot de passe sera haché de manière sécurisée en base de données.</div>
-                        </div>
-
-                        <div class="mb-4">
-                            {{ form_label(form.description, null, {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(form.description) }}
-                        </div>
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ path('admin_guest_index') }}" class="btn btn-secondary">Annuler</a>
-                            <button type="submit" class="btn btn-primary">Enregistrer l'invité</button>
-                        </div>
-                    {{ form_end(form) }}
-                </div>
-            </div>
+        <div class="form-group mb-3">
+            {{ form_label(form.name, 'Nom') }}
+            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.name) }}
         </div>
-    </div>
-</div>
+
+        <div class="form-group mb-3">
+            {{ form_label(form.email, 'Email') }}
+            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.email) }}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form_label(form.plainPassword, 'Mot de passe') }}
+            {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.plainPassword) }}
+        </div>
+
+        <div class="form-group mb-3">
+            {{ form_label(form.description, 'Description') }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.description) }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+    {{ form_end(form) }}
 {% endblock %}

@@ -35,10 +35,8 @@ class HomeControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/guests');
         $this->assertResponseIsSuccessful();
 
-        // L'invité actif des fixtures doit être affiché
         $this->assertAnySelectorTextContains('h4', 'Paul Actif');
 
-        // L'invité révoqué des fixtures ne doit JAMAIS apparaître
         $this->assertStringNotContainsString('Marc Bloque', $this->client->getResponse()->getContent());
     }
 
@@ -81,10 +79,8 @@ public function testActiveGuestDetailPageIsSuccessful(): void
         $this->client->request('GET', '/portfolio/' . $album->getId());
         $this->assertResponseIsSuccessful();
 
-        // La photo de l'invité actif doit être présente
         $this->assertStringContainsString('Désert du Sahara', $this->client->getResponse()->getContent());
 
-        // La photo de l'invité révoqué ne doit pas être affichée
         $this->assertStringNotContainsString('Photo Cachée Révocable', $this->client->getResponse()->getContent());
     }
 }

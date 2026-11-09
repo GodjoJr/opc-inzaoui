@@ -31,4 +31,5 @@
 
 /steps.md
 
-
+/coverage/
+/.phpunit.cache/

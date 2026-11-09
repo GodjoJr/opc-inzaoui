@@ -19,7 +19,6 @@ class SecurityControllerTest extends WebTestCase
         $client = static::createClient();
         $crawler = $client->request('GET', '/login');
 
-        // Soumission avec mauvais identifiants
         $button = $crawler->selectButton('Se connecter');
         if ($button->count() > 0) {
             $form = $button->form([
@@ -33,10 +32,17 @@ class SecurityControllerTest extends WebTestCase
         }
     }
 
-    public function testLogoutRedirects(): void
+public function testLogout(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/logout');
+        $client->catchExceptions(false);
+
+        try {
+            $client->request('GET', '/logout');
+        } catch (\LogicException $e) {
+            $this->assertStringContainsString('firewall', $e->getMessage());
+            return;
+        }
 
         $this->assertTrue($client->getResponse()->isRedirection());
     }

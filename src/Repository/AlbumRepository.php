@@ -21,28 +21,26 @@ class AlbumRepository extends ServiceEntityRepository
         parent::__construct($registry, Album::class);
     }
 
-//    /**
-//     * @return Album[] Returns an array of Album objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Récupère les albums paginés pour le back-office.
+     */
+    public function findAllPaginated(int $page = 1, int $limit = 15): array
+    {
+        $page = max(1, $page);
 
-//    public function findOneBySomeField($value): ?Album
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $items = $this->createQueryBuilder('a')
+            ->orderBy('a.id', 'ASC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        $total = $this->count([]);
+
+        return [
+            'items' => $items,
+            'total' => $total,
+            'pages' => max(1, (int) ceil($total / $limit)),
+        ];
+    }
 }

@@ -3,16 +3,24 @@
 {% block front %}
     <div class="row">
         <div class="col-12">
-            <h3 class="mb-4">{{ guest.name }}</h3>
-            <p class="mb-5 w-100">{{ guest.description }}</p>
+            <h3 class="mb-4">
+                {{ guest.name }}
+            </h3>
+            <p class="mb-5 w-100">
+                {{ guest.description }}
+            </p>
             <div class="row">
-                {% for media in guest.medias %}
+                {% for media in medias %}
                     <div class="col-4 media mb-4">
-                        <img class="w-100" src="{{ asset(media.path) }}" alt="{{ media.title }}">
-                    </div>
-                {% endfor %}
+                        <img class="w-100 img-fluid rounded" src="{{ asset(media.path) }}" alt="{{ media.title|default(guest.name ~ ' photo') }}" loading="lazy" decoding="async"></div>
+                    {% endfor %}
+
+                    {% include 'partials/_pagination.html.twig' with {
+    route: 'guest',
+    routeParams: {id: guest.id}
+} %}
+                </div>
             </div>
         </div>
-    </div>
-{% endblock %}
-
+    {% endblock %}
+    

@@ -12,7 +12,8 @@
                     </div>
                 {% endfor %}
             </div>
+
+            {% include 'partials/_pagination.html.twig' with {route: 'guests'} %}
         </div>
     </div>
 {% endblock %}
-

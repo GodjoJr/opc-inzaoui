@@ -4,8 +4,10 @@ namespace App\Controller\Admin;
 
 use App\Entity\Media;
 use App\Form\MediaType;
+use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,8 +17,7 @@ class MediaController extends AbstractController
     #[Route('/admin/media', name: 'admin_media_index')]
     public function index(Request $request, EntityManagerInterface $em): Response
     {
-        $page = $request->query->getInt('page', 1);
-
+        $page = max(1, $request->query->getInt('page', 1));
         $criteria = [];
 
         if (!$this->isGranted('ROLE_ADMIN')) {
@@ -35,16 +36,18 @@ class MediaController extends AbstractController
 
         return $this->render('admin/media/index.html.twig', [
             'medias' => $medias,
-            'total'  => $total,
-            'page'   => $page,
+            'total' => $total,
+            'page' => $page,
         ]);
     }
 
-    #[Route('/admin/media/add', name: 'admin_media_add')]
-    public function add(Request $request, EntityManagerInterface $em): Response
+    #[Route('/admin/media/add', name: 'admin_media_add', methods: ['GET', 'POST'])]
+    public function add(Request $request, EntityManagerInterface $em, ImageUploader $imageUploader): Response
     {
         $media = new Media();
-        $form = $this->createForm(MediaType::class, $media, ['is_admin' => $this->isGranted('ROLE_ADMIN')]);
+        $form = $this->createForm(MediaType::class, $media, [
+            'is_admin' => $this->isGranted('ROLE_ADMIN'),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -52,17 +55,18 @@ class MediaController extends AbstractController
                 $media->setUser($this->getUser());
             }
 
-            $file = $media->getFile();
-            if ($file) {
-                $filename = md5(uniqid()) . '.' . $file->guessExtension();
-                $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads';
+            /** @var UploadedFile|null $file */
+            $file = $form->get('file')->getData();
 
-                $file->move($uploadDir, $filename);
-                $media->setPath('uploads/' . $filename);
+            if ($file) {
+                $relativePath = $imageUploader->uploadAndConvertToWebp($file);
+                $media->setPath($relativePath);
             }
 
             $em->persist($media);
             $em->flush();
+
+            $this->addFlash('success', 'Le média a été ajouté et optimisé au format WebP.');
 
             return $this->redirectToRoute('admin_media_index');
         }

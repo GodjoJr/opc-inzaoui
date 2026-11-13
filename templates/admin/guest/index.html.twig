@@ -61,4 +61,5 @@
             {% endfor %}
         </tbody>
     </table>
+    {% include 'partials/_pagination.html.twig' with {route: 'admin_guest_index'} %}
 {% endblock %}

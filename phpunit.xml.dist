@@ -30,6 +30,7 @@
         <exclude>
             <file>src/Kernel.php</file>
             <directory suffix=".php">src/DataFixtures</directory>
+            <directory>src/Command</directory>
         </exclude>
     </source>
 </phpunit>

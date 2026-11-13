@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Album;
 use App\Form\AlbumType;
+use App\Repository\AlbumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,13 +13,17 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class AlbumController extends AbstractController
 {
-    #[Route('/admin/album', name: 'admin_album_index')]
-    public function index(EntityManagerInterface $em): Response
+#[Route('/admin/album', name: 'admin_album_index', methods: ['GET'])]
+    public function index(Request $request, AlbumRepository $albumRepository): Response
     {
-        $albums = $em->getRepository(Album::class)->findAll();
+        $page = max(1, $request->query->getInt('page', 1));
+        $pagination = $albumRepository->findAllPaginated($page, 15);
 
         return $this->render('admin/album/index.html.twig', [
-            'albums' => $albums,
+            'albums' => $pagination['items'],
+            'total' => $pagination['total'],
+            'currentPage' => $page,
+            'totalPages' => $pagination['pages'],
         ]);
     }
 

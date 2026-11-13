@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\User;
 use App\Form\GuestType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,16 +17,18 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class GuestController extends AbstractController
 {
-    #[Route('', name: 'admin_guest_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $em): Response
+#[Route('', name: 'admin_guest_index', methods: ['GET'])]
+#[Route('', name: 'admin_guest_index', methods: ['GET'])]
+    public function index(Request $request, UserRepository $userRepository): Response
     {
-        $guests = $em->getRepository(User::class)->findBy(
-            ['admin' => false],
-            ['name' => 'ASC']
-        );
+        $page = max(1, $request->query->getInt('page', 1));
+        $pagination = $userRepository->findAllGuestsPaginated($page, 15);
 
         return $this->render('admin/guest/index.html.twig', [
-            'guests' => $guests,
+            'guests' => $pagination['items'],
+            'total' => $pagination['total'],
+            'currentPage' => $page,
+            'totalPages' => $pagination['pages'],
         ]);
     }
 

@@ -1,0 +1,19 @@
+{% if totalPages is defined and totalPages > 1 %}
+    <nav aria-label="Navigation des pages" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{ currentPage <= 1 ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ path(route, routeParams|default({})|merge({page: currentPage - 1})) }}">Précédent</a>
+            </li>
+
+            {% for p in 1..totalPages %}
+                <li class="page-item {{ p == currentPage ? 'active' : '' }}">
+                    <a class="page-link" href="{{ path(route, routeParams|default({})|merge({page: p})) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+
+            <li class="page-item {{ currentPage >= totalPages ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ path(route, routeParams|default({})|merge({page: currentPage + 1})) }}">Suivant</a>
+            </li>
+        </ul>
+    </nav>
+{% endif %}

@@ -75,20 +75,16 @@ class ConvertMediasWebpCommand extends Command
                 continue;
             }
 
-            // Redimensionner à 1920px de large maximum
             $image = $this->resizeIfNeeded($image, 1920);
 
-            // Construction du nouveau chemin .webp
             $newRelativePath = preg_replace('/\.(jpg|jpeg|png)$/i', '.webp', $relativePath);
             $fullDestPath = $this->publicDir . '/' . ltrim($newRelativePath, '/');
 
             if (imagewebp($image, $fullDestPath, 82)) {
                 imagedestroy($image);
 
-                // Mise à jour de l'entité
                 $media->setPath($newRelativePath);
 
-                // Suppression de l'ancien fichier si l'option --keep-originals n'est pas passée
                 if (!$keepOriginals && $fullSourcePath !== $fullDestPath) {
                     unlink($fullSourcePath);
                 }
@@ -101,7 +97,6 @@ class ConvertMediasWebpCommand extends Command
             }
         }
 
-        // Sauvegarde globale des nouveaux chemins dans PostgreSQL
         $this->em->flush();
 
         $io->success(sprintf(

@@ -9,7 +9,7 @@ on:
 env:
   APP_ENV: test
   APP_SECRET: test_secret_key_for_ci_pipeline
-  DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/inazaoui_test?serverVersion=16&charset=utf8"
+  DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/inazaoui?serverVersion=16&charset=utf8"
 
 jobs:
   ci:
@@ -53,6 +53,7 @@ jobs:
           php bin/console cache:warmup --env=dev
           php bin/console doctrine:database:create --if-not-exists --env=test
           php bin/console doctrine:schema:update --force --env=test
+          php bin/console doctrine:fixtures:load --no-interaction --env=test
 
       # 2. ANALYSE STATIQUE & LINTERS SYMFONY
       - name: Lint Symfony YAML, Twig & Container

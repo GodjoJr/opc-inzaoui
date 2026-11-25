@@ -2,7 +2,7 @@ name: CI — Ina Zaoui
 
 on:
   push:
-    branches: [ main, migration-symfony]
+    branches: [ main, migration-symfony ]
   pull_request:
     branches: [ main ]
 
@@ -13,7 +13,7 @@ env:
 
 jobs:
   ci:
-    name: Build, Tests & Static Analysis
+    name: Build, Static Analysis & Tests
     runs-on: ubuntu-latest
 
     services:
@@ -32,6 +32,7 @@ jobs:
           --health-retries=5
 
     steps:
+      # 1. BASE DE LA CONFIGURATION
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -52,3 +53,35 @@ jobs:
           php bin/console cache:warmup --env=dev
           php bin/console doctrine:database:create --if-not-exists --env=test
           php bin/console doctrine:schema:update --force --env=test
+
+      # 2. ANALYSE STATIQUE & LINTERS SYMFONY
+      - name: Lint Symfony YAML, Twig & Container
+        run: |
+          php bin/console lint:yaml config --parse-tags
+          php bin/console lint:twig templates
+          php bin/console lint:container
+
+      - name: Validate Doctrine mapping
+        run: php bin/console doctrine:schema:validate --skip-sync --env=test
+
+      - name: Run PHPStan static analysis
+        run: vendor/bin/phpstan analyse --no-progress
+
+      # 3. EXÉCUTION DES TESTS & COUVERTURE (SEUIL 70 %)
+      - name: Run PHPUnit with coverage
+        run: php bin/phpunit --coverage-clover coverage.xml
+
+      - name: Check minimum 70% code coverage
+        run: |
+          php -r '
+          $xml = simplexml_load_file("coverage.xml");
+          $metrics = $xml->project->metrics;
+          $statements = (int) $metrics["statements"];
+          $covered = (int) $metrics["coveredstatements"];
+          $ratio = $statements > 0 ? round(($covered / $statements) * 100, 2) : 0;
+          echo "Code coverage: {$ratio}%\n";
+          if ($ratio < 70) {
+              fwrite(STDERR, "Error: Code coverage ({$ratio}%) is below 70%.\n");
+              exit(1);
+          }
+          '

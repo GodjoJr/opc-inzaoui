@@ -25,18 +25,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(options: ['default' => true])]
     private bool $isActive = true;
 
-    #[ORM\Column]
-    private ?string $name = null;
+    #[ORM\Column(length: 255)]
+    private string $name = '';
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    private ?string $email = null;
+    private string $email = '';
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $password = null;
 
+    /**
+     * @var Collection<int, Media>
+     */
     #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user', cascade: ['remove'], orphanRemoval: true)]
     private Collection $medias;
 

@@ -1,0 +1,54 @@
+name: CI — Ina Zaoui
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  APP_ENV: test
+  APP_SECRET: test_secret_key_for_ci_pipeline
+  DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/inazaoui_test?serverVersion=16&charset=utf8"
+
+jobs:
+  ci:
+    name: Build, Tests & Static Analysis
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: inazaoui_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, gd, intl, mbstring, xml, pcov
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Prepare environment & test database
+        run: |
+          mkdir -p public/uploads
+          php bin/console cache:warmup --env=dev
+          php bin/console doctrine:database:create --if-not-exists --env=test
+          php bin/console doctrine:schema:update --force --env=test

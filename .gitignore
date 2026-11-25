@@ -1,4 +1,6 @@
 /.idea
+/.vscode
+
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -12,25 +14,30 @@
 ###> phpunit/phpunit ###
 /phpunit.xml
 .phpunit.result.cache
+/.phpunit.cache/
+/coverage/
+/coverage.xml
 ###< phpunit/phpunit ###
 
-###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
+###> phpstan/phpstan ###
+/phpstan.neon
+/phpstan-report.txt
+###< phpstan/phpstan ###
 
-###> Docker & OS ###
+###> Docker, Database & OS ###
 .DS_Store
-/docker-entrypoint-initdb.d/
-###< Docker & OS ###
+*.sql
+*.zip
+/docker-entrypoint-initdb.d/*
+!/docker-entrypoint-initdb.d/.gitkeep
+###< Docker, Database & OS ###
 
 ###> Uploads ###
 /public/uploads/*
 !/public/uploads/.gitkeep
 ###< Uploads ###
 
+###> Notes personnelles ###
 /steps.md
 /chronologie.md
-
-/coverage/
-/.phpunit.cache/
+###< Notes personnelles ###

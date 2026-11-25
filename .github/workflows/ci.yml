@@ -2,7 +2,7 @@ name: CI — Ina Zaoui
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, migration-symfony]
   pull_request:
     branches: [ main ]
 

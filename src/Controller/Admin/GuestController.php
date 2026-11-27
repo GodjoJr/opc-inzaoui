@@ -17,8 +17,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class GuestController extends AbstractController
 {
-#[Route('', name: 'admin_guest_index', methods: ['GET'])]
-#[Route('', name: 'admin_guest_index', methods: ['GET'])]
+    #[Route('', name: 'admin_guest_index', methods: ['GET'])]
     public function index(Request $request, UserRepository $userRepository): Response
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -67,9 +66,13 @@ class GuestController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/toggle-status', name: 'admin_guest_toggle_status', methods: ['POST'])]
-    public function toggleStatus(User $guest, EntityManagerInterface $em): Response
+    #[Route('/toggle/{id}', name: 'admin_guest_toggle_status', methods: ['POST'])]
+    public function toggleStatus(Request $request, User $guest, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('toggle_guest_' . $guest->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
         if ($guest->isAdmin()) {
             throw $this->createAccessDeniedException('Impossible de modifier le statut d\'un compte administrateur.');
         }
@@ -77,11 +80,7 @@ class GuestController extends AbstractController
         $guest->setIsActive(!$guest->isActive());
         $em->flush();
 
-        $message = $guest->isActive()
-            ? sprintf('L\'accès de %s a été réactivé.', $guest->getName())
-            : sprintf('L\'accès de %s a été révoqué.', $guest->getName());
-
-        $this->addFlash('info', $message);
+        $this->addFlash('success', $guest->isActive() ? 'Accès réactivé.' : 'Accès bloqué.');
 
         return $this->redirectToRoute('admin_guest_index');
     }

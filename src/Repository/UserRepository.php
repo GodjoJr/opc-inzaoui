@@ -90,30 +90,45 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getOneOrNullResult();
     }
 
-/**
-     * Front-office : Invités actifs paginés avec leurs médias.
+    /**
+     * Front-office : Invités actifs paginés avec leur nombre de médias.
+     *
+     * Le nombre de médias est calculé en SQL (COUNT + GROUP BY) : aucun objet Media n'est chargé.
+     *
+     * @return array{items: list<array{guest: User, mediaCount: int}>, total: int, pages: int}
      */
     public function findActiveGuestsPaginated(int $page = 1, int $limit = 10): array
     {
         $page = max(1, $page);
 
-        $query = $this->createQueryBuilder('u')
+        $rows = $this->createQueryBuilder('u')
+            ->select('u AS guest', 'COUNT(m.id) AS mediaCount')
             ->leftJoin('u.medias', 'm')
-            ->addSelect('m')
             ->where('u.admin = :isAdmin')
             ->andWhere('u.isActive = :isActive')
             ->setParameter('isAdmin', false)
             ->setParameter('isActive', true)
+            ->groupBy('u.id')
             ->orderBy('u.name', 'ASC')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
-            ->getQuery();
+            ->getQuery()
+            ->getResult();
 
-        $paginator = new Paginator($query, true);
-        $total = count($paginator);
+        $total = (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.admin = :isAdmin')
+            ->andWhere('u.isActive = :isActive')
+            ->setParameter('isAdmin', false)
+            ->setParameter('isActive', true)
+            ->getQuery()
+            ->getSingleScalarResult();
 
         return [
-            'items' => iterator_to_array($paginator),
+            'items' => array_map(
+                static fn (array $row): array => ['guest' => $row['guest'], 'mediaCount' => (int) $row['mediaCount']],
+                $rows
+            ),
             'total' => $total,
             'pages' => max(1, (int) ceil($total / $limit)),
         ];

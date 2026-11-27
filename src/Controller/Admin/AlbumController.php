@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_ADMIN')]
 class AlbumController extends AbstractController
 {
-#[Route('/admin/album', name: 'admin_album_index', methods: ['GET'])]
+    #[Route('/admin/album', name: 'admin_album_index', methods: ['GET'])]
     public function index(Request $request, AlbumRepository $albumRepository): Response
     {
         $page = max(1, $request->query->getInt('page', 1));
@@ -69,15 +71,17 @@ class AlbumController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/album/delete/{id}', name: 'admin_album_delete')]
-    public function delete(int $id, EntityManagerInterface $em): Response
+    #[Route('/admin/album/delete/{id}', name: 'admin_album_delete', methods: ['POST'])]
+    public function delete(Request $request, Album $album, EntityManagerInterface $em): Response
     {
-        $album = $em->getRepository(Album::class)->find($id);
-
-        if ($album) {
-            $em->remove($album);
-            $em->flush();
+        if (!$this->isCsrfTokenValid('delete_album_' . $album->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
+
+        $em->remove($album);
+        $em->flush();
+
+        $this->addFlash('success', 'L\'album a été supprimé avec succès.');
 
         return $this->redirectToRoute('admin_album_index');
     }

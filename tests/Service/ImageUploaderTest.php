@@ -30,7 +30,6 @@ class ImageUploaderTest extends TestCase
         $sourceFile = $this->tempDir . '/test-photo.jpg';
         $im = imagecreatetruecolor(2000, 1000);
         imagejpeg($im, $sourceFile, 90);
-        imagedestroy($im);
 
         $uploadedFile = new UploadedFile(
             $sourceFile,

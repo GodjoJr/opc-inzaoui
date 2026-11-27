@@ -39,7 +39,6 @@ class ImageUploader
         if ($image !== null) {
             $image = $this->resizeIfNeeded($image, 1920);
             imagewebp($image, $destinationPath, $quality);
-            imagedestroy($image);
 
             return 'uploads/' . $newFilename;
         }
@@ -79,7 +78,6 @@ class ImageUploader
         imagesavealpha($resized, true);
 
         imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        imagedestroy($image);
 
         return $resized;
     }

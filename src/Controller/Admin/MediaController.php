@@ -8,6 +8,7 @@ use App\Form\MediaType;
 use App\Service\ImageUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -80,20 +81,30 @@ class MediaController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/media/delete/{id}', name: 'admin_media_delete')]
-    public function delete(int $id, EntityManagerInterface $em): Response
-    {
-        $media = $em->getRepository(Media::class)->find($id);
-
-        if ($media) {
-            $filePath = $this->getParameter('kernel.project_dir') . '/public/' . $media->getPath();
-            if (file_exists($filePath) && is_file($filePath)) {
-                unlink($filePath);
-            }
-
-            $em->remove($media);
-            $em->flush();
+    #[Route('/admin/media/delete/{id}', name: 'admin_media_delete', methods: ['POST'])]
+    public function delete(
+        Request $request,
+        Media $media,
+        EntityManagerInterface $em,
+        #[Autowire('%kernel.project_dir%/public/uploads')] string $uploadsDir
+    ): Response {
+        if (!$this->isCsrfTokenValid('delete_media_' . $media->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
         }
+
+        if (!$this->isGranted('ROLE_ADMIN') && $media->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous ne pouvez supprimer que vos propres médias.');
+        }
+
+        $filePath = $uploadsDir . '/' . basename((string) $media->getPath());
+        if (is_file($filePath)) {
+            unlink($filePath);
+        }
+
+        $em->remove($media);
+        $em->flush();
+
+        $this->addFlash('success', 'Le média a été supprimé avec succès.');
 
         return $this->redirectToRoute('admin_media_index');
     }

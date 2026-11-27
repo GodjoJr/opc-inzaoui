@@ -40,7 +40,7 @@
                     </td>
                     <td>
                         <form method="post" action="{{ path('admin_guest_toggle_status', {id: guest.id}) }}" class="d-inline">
-                            <input type="hidden" name="_token" value="{{ csrf_token('authenticate') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('toggle_guest_' ~ guest.id) }}">
                             {% if guest.isActive %}
                                 <button type="submit" class="btn btn-warning">Bloquer</button>
                             {% else %}

@@ -81,7 +81,6 @@ class ConvertMediasWebpCommand extends Command
             $fullDestPath = $this->publicDir . '/' . ltrim($newRelativePath, '/');
 
             if (imagewebp($image, $fullDestPath, 82)) {
-                imagedestroy($image);
 
                 $media->setPath($newRelativePath);
 
@@ -92,7 +91,6 @@ class ConvertMediasWebpCommand extends Command
                 $convertedCount++;
                 $io->text(sprintf('✔ Converti : %s -> %s', $relativePath, $newRelativePath));
             } else {
-                imagedestroy($image);
                 $io->error(sprintf('Échec de l\'écriture WebP pour : %s', $relativePath));
             }
         }
@@ -137,7 +135,6 @@ class ConvertMediasWebpCommand extends Command
         imagesavealpha($resized, true);
 
         imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        imagedestroy($image);
 
         return $resized;
     }

@@ -27,13 +27,17 @@
                         <td>{{ media.album.name ?? '' }}</td>
                     {% endif %}
                     <td>
-                        <a href="{{ path('admin_media_delete', {id: media.id}) }}" class="btn btn-danger">Supprimer</a>
+                        <form method="post" action="{{ path('admin_media_delete', {id: media.id}) }}" class="d-inline"
+                            onsubmit="return confirm('Supprimer ce média ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete_media_' ~ media.id) }}">
+    <button type="submit" class="btn btn-danger">Supprimer</button>
+</form>
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% set totalPages = (total / 50)|round(0, 'ceil') %}
+    {% set totalPages = (total / 25)|round(0, 'ceil') %}
 
     <nav aria-label="Page navigation">
         <ul class="pagination">

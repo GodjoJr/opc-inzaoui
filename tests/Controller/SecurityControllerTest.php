@@ -32,18 +32,21 @@ class SecurityControllerTest extends WebTestCase
         }
     }
 
-public function testLogout(): void
+    public function testLogout(): void
     {
         $client = static::createClient();
-        $client->catchExceptions(false);
+        $userRepository = static::getContainer()->get(\App\Repository\UserRepository::class);
+        $admin = $userRepository->findOneBy(['email' => 'ina@inazaoui.com']);
+        $this->assertNotNull($admin);
 
-        try {
-            $client->request('GET', '/logout');
-        } catch (\LogicException $e) {
-            $this->assertStringContainsString('firewall', $e->getMessage());
-            return;
-        }
+        $client->loginUser($admin);
+        $client->request('GET', '/admin/media');
+        $this->assertResponseIsSuccessful();
 
-        $this->assertTrue($client->getResponse()->isRedirection());
+        $client->request('GET', '/logout');
+        $this->assertResponseRedirects('/');
+
+        $client->request('GET', '/admin/media');
+        $this->assertResponseRedirects('/login');
     }
 }

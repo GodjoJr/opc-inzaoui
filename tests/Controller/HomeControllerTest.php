@@ -83,4 +83,27 @@ public function testActiveGuestDetailPageIsSuccessful(): void
 
         $this->assertStringNotContainsString('Photo Cachée Révocable', $this->client->getResponse()->getContent());
     }
+
+    public function testGuestsPageDisplaysCorrectMediaCount(): void
+    {
+        $this->client->request('GET', '/guests');
+        $this->assertResponseIsSuccessful();
+
+        $this->assertAnySelectorTextContains('h4', 'Paul Actif (1)');
+    }
+
+    public function testPaginationPagesRespond200(): void
+    {
+        $this->client->request('GET', '/portfolio?page=2');
+        $this->assertResponseIsSuccessful();
+
+        $this->client->request('GET', '/guests?page=2');
+        $this->assertResponseIsSuccessful();
+    }
+
+    public function testUnknownPortfolioAlbumReturns404(): void
+    {
+        $this->client->request('GET', '/portfolio/9999');
+        $this->assertResponseStatusCodeSame(404);
+    }
 }

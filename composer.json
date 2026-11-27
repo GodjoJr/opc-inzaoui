@@ -85,7 +85,7 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "test:coverage": "/usr/local/bin/php -d pcov.enabled=1 bin/phpunit --coverage-text --coverage-html coverage"
+        "test:coverage": "\"$HOME/Library/Application Support/Herd/bin/php83\" -d zend_extension=/Applications/Herd.app/Contents/Resources/xdebug/xdebug-83-x86.so -d xdebug.mode=coverage bin/phpunit --coverage-text --coverage-html coverage"
     },
     "conflict": {
         "symfony/symfony": "*"

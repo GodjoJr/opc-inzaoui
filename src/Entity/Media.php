@@ -45,6 +45,7 @@ class Media
         return $this->id;
     }
 
+
     public function getUser(): ?User
     {
         return $this->user;
